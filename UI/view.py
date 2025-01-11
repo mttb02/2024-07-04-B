@@ -6,7 +6,7 @@ class View(ft.UserControl):
         super().__init__()
         # page stuff
         self._page = page
-        self._page.title = "TdP 2024 - Esame del 04/07/2024 - B"
+        self._page.title = "TdP 2024 - Esame del 04/07/2024 - A"
         self._page.horizontal_alignment = 'CENTER'
         self._page.window_width = 950
         self._page.theme_mode = ft.ThemeMode.LIGHT
@@ -16,7 +16,7 @@ class View(ft.UserControl):
         self._title = None
         # first row
         self.ddyear = None
-        self.ddstate = None
+        self.ddshape = None
         self.btn_graph = None
         self.btn_path = None
         # second row
@@ -25,7 +25,7 @@ class View(ft.UserControl):
 
     def load_interface(self):
         # title
-        self._title = ft.Text("TdP 2024 - Esame del 04-07-2024 - B", color="blue", size=24)
+        self._title = ft.Text("TdP 2024 - Esame del 04-07-2024 - A", color="blue", size=24)
         self._page.controls.append(self._title)
 
         # First row with some controls
@@ -34,8 +34,8 @@ class View(ft.UserControl):
 
         self._controller.populate_ddyear()
 
-        self.ddstate = ft.Dropdown(label="Stato",
-                                   hint_text="Stato da analizzare per gli avvistamenti.")
+        self.ddshape = ft.Dropdown(label="Shape",
+                                   hint_text="Shape da analizzare per gli avvistamenti.")
         self.btn_graph = ft.ElevatedButton(text="Crea Grafo",
                                            tooltip="Crea il grafo del punto 1",
                                            on_click=self._controller.handle_graph)
@@ -43,7 +43,9 @@ class View(ft.UserControl):
                                           tooltip="Risolvi il punto 2",
                                           on_click=self._controller.handle_path)
 
-        row1 = ft.Row([self.ddyear, self.ddstate, self.btn_graph, self.btn_path],
+        self.btn_path.disabled = True
+
+        row1 = ft.Row([self.ddyear, self.ddshape, self.btn_graph, self.btn_path],
                       alignment=ft.MainAxisAlignment.SPACE_EVENLY)
         self._page.controls.append(row1)
 

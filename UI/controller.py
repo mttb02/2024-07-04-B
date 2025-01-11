@@ -10,75 +10,87 @@ class Controller:
         # the model, which implements the logic of the program and holds the data
         self._model = model
 
-
-    def populate_ddyear(self):
-        self._view.ddyear.options.clear()
-        temp_years = self._model.get_all_years()
-
-        for y in temp_years:
-            self._view.ddyear.options.append(ft.dropdown.Option(key=y, text=y, on_click=self.populate_ddstate))
-
-        self._view.update_page()
-
-    def populate_ddstate(self, e):
-        if e.control.key is None:
-            self._view.create_alert("Selezionare un anno!")
-            return
-
-        self._view.ddstate.options.clear()
-
-        for s in self._model.get_states_year(e.control.key):
-            self._view.ddstate.options.append(ft.dropdown.Option(key=s.id, text=s.name))
-
-        self._view.update_page()
+        self._anno_selezionato = None
+        self._forma_selezionata = None
 
     def handle_graph(self, e):
+        if self._anno_selezionato is None:
+            self._view.create_alert("Selezionare un anno")
+            return
+        if self._forma_selezionata is None:
+            self._view.create_alert("Selezionare una forma")
+            return
 
         self._view.txt_result1.controls.clear()
 
-        if self._view.ddyear.value is None:
-            self._view.create_alert("Selezionare un anno!")
-            return
-        else:
-            temp_anno = self._view.ddyear.value
+        self._model.create_graph(self._anno_selezionato, self._forma_selezionata)
 
-        if self._view.ddstate.value is None:
-            self._view.create_alert("Selezionare uno stato!")
-            return
-        else:
-            temp_stato = self._view.ddstate.value
+        self._view.txt_result1.controls.append(ft.Text(f"Numero di vertici: {self._model.get_num_of_nodes()}"))
+        self._view.txt_result1.controls.append(ft.Text(f"Numero di vertici: {self._model.get_num_of_edges()}"))
 
-        self._model.create_graph(temp_anno, temp_stato)
+        self._view.txt_result1.controls.append(ft.Text(f"Il grafo ha: {self._model.get_num_of_comp_conn()} componenti connesse"))
 
-        self._view.txt_result1.controls.append(ft.Text(f"Numero di vertici: {self._model.get_num_vertici()}"))
-        self._view.txt_result1.controls.append(ft.Text(f"Numero di archi: {self._model.get_num_archi()}"))
-
-        self._view.txt_result1.controls.append(ft.Text(f"Il grafo ha: {self._model.get_num_comp_conn()} componenti connesse"))
-
-        max_comp_conn = self._model.get_max_comp_conn()
-
-        self._view.txt_result1.controls.append(ft.Text(f"La componente connessa più grande è costituita da {max_comp_conn[0]} nodi:"))
-
-        for c in max_comp_conn[1]:
+        num_compnenti, componente = self._model.get_comp_conn_max()
+        self._view.txt_result1.controls.append(ft.Text(f"La componente connessa più grande è costituita da {num_compnenti} nodi:"))
+        for n in componente:
             self._view.txt_result1.controls.append(
-                ft.Text(f"{c}"))
+                ft.Text(f"{n}"))
+
+        self._view.btn_path.disabled = False
 
         self._view.update_page()
 
 
     def handle_path(self, e):
-        if self._view.ddyear.value is None:
-            self._view.create_alert("Selezionare un anno!")
-            return
-        else:
-            temp_anno = self._view.ddyear.value
 
-        if self._view.ddstate.value is None:
-            self._view.create_alert("Selezionare uno stato!")
-            return
-        else:
-            temp_stato = self._view.ddstate.value
+        self._view.txt_result2.controls.clear()
 
+        temp_punteggio, temp_avvistamenti = self._model.get_path()
+
+        self._view.txt_result2.controls.append(ft.Text(f"Cammino con punteggio massimo: {temp_punteggio}"))
+        for a in temp_avvistamenti:
+            self._view.txt_result2.controls.append(
+                ft.Text(f"{a}"))
+
+        self._view.update_page()
+
+        self._view.btn_path.disabled = True
+
+
+    def populate_ddyear(self):
+        self._view.ddyear.options.clear()
+
+        temp_anni = self._model.get_all_years()
+
+        for a in temp_anni:
+            self._view.ddyear.options.append(ft.dropdown.Option(key=a, text=a, on_click=self.get_year))
+
+        self._view.update_page()
+
+    def get_year(self, e):
+        if e.control.key is None:
+            self._view.create_alert("Selezionare un anno")
+        else:
+            self._anno_selezionato = e.control.key
+            self.populate_ddshape()
+            self._view.btn_path.disabled = True
+
+    def populate_ddshape(self):
+        self._view.ddshape.options.clear()
+
+        temp_forme = self._model.get_shapes_in_year(self._anno_selezionato)
+
+        for f in temp_forme:
+            self._view.ddshape.options.append(ft.dropdown.Option(key=f, text=f, on_click=self.get_shape))
+
+        self._view.update_page()
+
+    def get_shape(self, e):
+        if e.control.key is None:
+            self._view.create_alert("Selezionare una forma")
+        else:
+            self._forma_selezionata = e.control.key
+            self._view.btn_path.disabled = True
 
 
 
